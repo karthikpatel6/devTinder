@@ -3,31 +3,39 @@ const connectDB = require('./config/database'); // Ensure database is connected
 const app = express();
 const User = require('./models/user');
 
+app.use(express.json()); // Middleware to parse JSON request bodies
 app.post("/signup", async (req,res) => {
+    // console.log("Request body:", req.body); // Log the request body to see what data is being sent
+
+
     // const userObj = {
     //     firstName: "Karthik",
     //     lastName: "Patel",
     //     emailId: "karthik.patel@example.com",
     //     password: "karthik@123"
-    // }
+    // } 
     // // Creating a new instance of the User model
     // const user = new User(userObj);
     // or
-    const user = new User({
-        firstName: "Virat",
-        lastName: "Kohli",
-        emailId: "virat.kohli@example.com",
-        password: "virat@123"
-    });
+    // const user = new User({
+    //     firstName: "Virat",
+    //     lastName: "Kohli",
+    //     emailId: "virat.kohli@example.com",
+    //     password: "virat@123",
+    //     age: 35,
+    //     gender: "Male"
+    // });
+    // or
+    const user = new User(req.body);
 
 
 
-
-    await user.save().then(() => {
-        res.status(201).send("User created successfully");
-    }).catch((err) => {
+    try {
+        await user.save();
+        res.send("User created successfully");
+    } catch (err) {
         res.status(400).send("Error creating user");
-    });
+    }
 });
 
 connectDB().then(() => {

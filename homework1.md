@@ -42,3 +42,7 @@
 - Create a user Schema and user Model
 - Create POST /signup API to add database
 - Push some documents using API calls from postman
+- ErrorHandling using try, catch
+
+- what is the difference between javascript and JSON
+- 

@@ -45,4 +45,8 @@
 - ErrorHandling using try, catch
 
 - what is the difference between javascript and JSON
-- 
+- Add the express.json middleware to your app
+- Make your signup API dymanic to recieve data from the end user
+- User.findOne with duplicate email ids,which object returned
+- API - GET user by email
+- FEED API - GET /feed -get all the users from the database

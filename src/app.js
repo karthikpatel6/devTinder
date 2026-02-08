@@ -2,6 +2,9 @@ const express = require('express');
 const connectDB = require('./config/database'); // Ensure database is connected
 const app = express();
 const User = require('./models/user');
+const validateSignUpData  = require('./utils/validation');
+
+const bcrypt = require('bcrypt');
 
 app.use(express.json()); // Middleware to parse JSON request bodies
 app.post("/signup", async (req,res) => {
@@ -26,17 +29,60 @@ app.post("/signup", async (req,res) => {
     //     gender: "Male"
     // });
     // or
-    const user = new User(req.body);
-
-
 
     try {
+    // validate the data
+    console.log("before validation");
+    validateSignUpData(req);
+    console.log("after validation");
+
+    const { firstName, lastName, emailId, password } = req.body;
+
+    // Encrypt the password
+    const passwordHash = await bcrypt.hash(password, 10);
+    console.log(passwordHash);
+
+    //Creating a new instance of the User model using the request body
+    const user = new User({
+        firstName,
+        lastName,
+        emailId,
+        password: passwordHash,
+    });
+
         await user.save();
         res.send("User created successfully");
     } catch (err) {
-        res.status(400).send("Error creating user");
+        res.status(400).send("Error creating user : " + err.message);
     }
 });
+
+app.post("/login", async (req,res) => {
+    try{
+        const { emailId,password} = req.body;
+        
+        const user = await User.findOne({ emailId: emailId });
+        if(!user){
+            throw new Error("User not found");
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if(isPasswordValid){
+
+            // Create a JWT Token
+
+
+            // Add the token to cookie and send the response back to the user
+            res.cookie("token", "fhjekfsdfv");
+
+            res.send("Login successful");
+        }else{
+            throw new Error("Invalid password");
+        }
+    }catch(err){
+        res.status(400).send("Error logging in : " + err.message);
+    }
+});
+
 
 // GET user by email API
 app.get("/user", async (req,res) => {

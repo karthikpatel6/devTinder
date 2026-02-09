@@ -3,10 +3,16 @@ const connectDB = require('./config/database'); // Ensure database is connected
 const app = express();
 const User = require('./models/user');
 const validateSignUpData  = require('./utils/validation');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const { userAuth } = require('./middlewares/auth');
+
 
 const bcrypt = require('bcrypt');
 
 app.use(express.json()); // Middleware to parse JSON request bodies
+app.use(cookieParser());
+
 app.post("/signup", async (req,res) => {
     // console.log("Request body:", req.body); // Log the request body to see what data is being sent
 
@@ -65,14 +71,16 @@ app.post("/login", async (req,res) => {
         if(!user){
             throw new Error("User not found");
         }
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = await user.validatePassword(password);
         if(isPasswordValid){
 
             // Create a JWT Token
-
+            const token = await user.getjwt();
 
             // Add the token to cookie and send the response back to the user
-            res.cookie("token", "fhjekfsdfv");
+            res.cookie("token", token, {
+                expires: new Date(Date.now() + 8*360000),
+            });
 
             res.send("Login successful");
         }else{
@@ -83,6 +91,32 @@ app.post("/login", async (req,res) => {
     }
 });
 
+app.get("/profile", async (req,res) => {
+    try{
+        // const cookies = req.cookies;
+        // const { token } = cookies;
+        // // Validate the token
+        // if(!token){
+        //     throw new Error("Token is not valid");
+        // }
+        // const decodedMessage = await jwt.verify(token, "DevTinder$676");
+        // console.log("Decoded JWT token:", decodedMessage);
+        // const { _id } = decodedMessage;
+        // console.log("User ID from decoded token:", _id);
+        const user = req.user;
+        res.send(user);
+
+    }catch(err){
+        res.status(400).send("Error fetching profile : " + err.message);
+    }
+})
+
+app.post("/sendConnectionRequest",userAuth, async (req,res) => {
+    const user = req.user;
+    console.log("Sending connection request");
+
+    res.send(user.firstName + " sent a connection request");
+})
 
 // GET user by email API
 app.get("/user", async (req,res) => {

@@ -1,13 +1,12 @@
 const express = require("express");
 const authRouter = express.Router();
 
-const validateSignUpData = require("../utils/validation");
+const { validateSignUpData } = require("../utils/validation");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
 
-
 authRouter.post("/signup", async (req,res) => {
-    try {
+    try { 
     // validate the data
     validateSignUpData(req);
 
@@ -40,12 +39,11 @@ authRouter.post("/login", async (req,res) => {
         if(!user){
             throw new Error("User not found");
         }
-        
+
         const isPasswordValid = await user.validatePassword(password);
         if(isPasswordValid){
-
             // Create a JWT Token
-            const token = await user.getjwt();
+            const token = await user.getJWT();
 
             // Add the token to cookie and send the response back to the user
             res.cookie("token", token, {
